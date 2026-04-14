@@ -17,7 +17,7 @@ A dynamic Employee Management System built with Django and Vanilla JS.
 
 1. **Clone & Enter Project**
    ```bash
-   git clone <your-repo-url>
+   git clone https://github.com/mosalah1729/Employee-management.git
    cd emp_mng
    ```
 

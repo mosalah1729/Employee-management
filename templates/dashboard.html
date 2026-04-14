@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <h1>Dashboard</h1>
+    <p class="mt-1 text-secondary" id="welcome-msg">Welcome to your employee management workspace.</p>
+</div>
+
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-top: 2rem;">
+    <!-- Forms Card -->
+    <div class="glass glass-panel" style="display: flex; flex-direction: column;">
+        <div style="font-size: 2.5rem; color: var(--accent-color); margin-bottom: 1rem;">
+            <i class="fa-solid fa-table-list"></i>
+        </div>
+        <h2>Form Templates</h2>
+        <p class="mt-1" style="color: var(--text-secondary); flex-grow: 1;">
+            Design dynamic forms with custom fields to collect specific employee data.
+        </p>
+        <div class="flex gap-2 mt-4" style="flex-wrap: wrap;">
+            <a href="/forms/" class="btn btn-secondary flex-grow-1" style="flex: 1; min-width: 120px;">
+                <i class="fa-solid fa-list"></i> View All
+            </a>
+            <a href="/forms/designer/" class="btn btn-primary flex-grow-1" style="flex: 1; min-width: 120px;">
+                <i class="fa-solid fa-plus"></i> Create New
+            </a>
+        </div>
+    </div>
+
+    <!-- Employees Card -->
+    <div class="glass glass-panel" style="display: flex; flex-direction: column;">
+        <div style="font-size: 2.5rem; color: var(--success-color); margin-bottom: 1rem;">
+            <i class="fa-solid fa-users"></i>
+        </div>
+        <h2>Employees</h2>
+        <p class="mt-1" style="color: var(--text-secondary); flex-grow: 1;">
+            Manage your employee database using your custom form templates.
+        </p>
+        <div class="flex gap-2 mt-4" style="flex-wrap: wrap;">
+            <a href="/employees/" class="btn btn-secondary flex-grow-1" style="flex: 1; min-width: 120px;">
+                <i class="fa-solid fa-list"></i> View All
+            </a>
+            <a href="/employees/add/" class="btn btn-primary flex-grow-1" style="flex: 1; min-width: 120px;">
+                <i class="fa-solid fa-user-plus"></i> Add Employee
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', async () => {
+        // Fetch profile to get username for welcome msg
+        try {
+            const response = await axios.get('/auth/profile/');
+            const user = response.data;
+            document.getElementById('welcome-msg').textContent = `Welcome back, ${user.username}!`;
+            document.querySelector('.navbar-item[href="/dashboard/"]').classList.add('active');
+        } catch (error) {
+            console.error('Failed to fetch profile', error);
+        }
+    });
+</script>
+{% endblock %}

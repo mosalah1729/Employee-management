@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+
+{% block title %}Profile{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <h1>Your Profile</h1>
+</div>
+
+<div class="glass glass-panel" style="max-width: 600px; margin: 0 auto;">
+    <div id="error-msg" class="alert alert-error"></div>
+    <div id="success-msg" class="alert alert-success"></div>
+
+    <form id="profile-form">
+        <div class="form-group">
+            <label class="form-label">Username (Read-only)</label>
+            <input type="text" id="username" class="form-control" disabled style="opacity: 0.7;">
+        </div>
+        
+        <div class="flex gap-4">
+            <div class="form-group" style="flex: 1;">
+                <label for="first_name" class="form-label">First Name</label>
+                <input type="text" id="first_name" class="form-control">
+            </div>
+            <div class="form-group" style="flex: 1;">
+                <label for="last_name" class="form-label">Last Name</label>
+                <input type="text" id="last_name" class="form-control">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="email" class="form-label">Email</label>
+            <input type="email" id="email" class="form-control">
+        </div>
+        
+        <div class="flex justify-between items-center mt-4">
+            <button type="submit" class="btn btn-primary">
+                Save Changes
+            </button>
+            <a href="/change-password/" class="btn btn-secondary">
+                <i class="fa-solid fa-lock"></i> Change Password
+            </a>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', async () => {
+        document.querySelector('.navbar-item[href="/profile/"]').classList.add('active');
+        
+        try {
+            const response = await axios.get('/auth/profile/');
+            const user = response.data;
+            document.getElementById('username').value = user.username;
+            document.getElementById('first_name').value = user.first_name || '';
+            document.getElementById('last_name').value = user.last_name || '';
+            document.getElementById('email').value = user.email || '';
+        } catch (error) {
+            console.error('Error fetching profile', error);
+        }
+    });
+
+    document.getElementById('profile-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const errorMsg = document.getElementById('error-msg');
+        const successMsg = document.getElementById('success-msg');
+        const submitBtn = e.target.querySelector('button[type="submit"]');
+        
+        errorMsg.style.display = 'none';
+        successMsg.style.display = 'none';
+        
+        try {
+            submitBtn.textContent = 'Saving...';
+            submitBtn.disabled = true;
+            
+            await axios.put('/auth/profile/', {
+                first_name: document.getElementById('first_name').value,
+                last_name: document.getElementById('last_name').value,
+                email: document.getElementById('email').value
+            });
+            
+            successMsg.textContent = 'Profile updated successfully.';
+            successMsg.style.display = 'block';
+        } catch (error) {
+            errorMsg.style.display = 'block';
+            errorMsg.textContent = 'Failed to update profile.';
+        } finally {
+            submitBtn.textContent = 'Save Changes';
+            submitBtn.disabled = false;
+        }
+    });
+</script>
+{% endblock %}

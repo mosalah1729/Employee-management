@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+
+{% block title %}Forms{% endblock %}
+
+{% block content %}
+<div class="flex justify-between items-center mb-4">
+    <div>
+        <h1>Form Templates</h1>
+        <p class="mt-1 text-secondary">Manage your dynamic forms</p>
+    </div>
+    <a href="/forms/designer/" class="btn btn-primary">
+        <i class="fa-solid fa-plus"></i> Create New Form
+    </a>
+</div>
+
+<div class="table-container">
+    <table id="forms-table">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Fields</th>
+                <th>Entries</th>
+                <th>Created</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody id="forms-tbody">
+            <!-- Populated via JS -->
+        </tbody>
+    </table>
+</div>
+
+<div id="empty-state" class="empty-state" style="display: none;">
+    <i class="fa-solid fa-file-invoice"></i>
+    <h3>No forms found</h3>
+    <p>Get started by creating your first form template.</p>
+    <a href="/forms/designer/" class="btn btn-primary mt-2">Create Form</a>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', async () => {
+        document.querySelector('.navbar-item[href="/forms/"]').classList.add('active');
+        fetchForms();
+    });
+
+    async function fetchForms() {
+        try {
+            const response = await axios.get('/forms/');
+            const forms = response.data;
+            const tbody = document.getElementById('forms-tbody');
+            const emptyState = document.getElementById('empty-state');
+            const tableContainer = document.querySelector('.table-container');
+            
+            if (forms.length === 0) {
+                tableContainer.style.display = 'none';
+                emptyState.style.display = 'block';
+                return;
+            }
+            
+            tableContainer.style.display = 'block';
+            emptyState.style.display = 'none';
+            tbody.innerHTML = '';
+            
+            forms.forEach(form => {
+                const date = new Date(form.created_at).toLocaleDateString();
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td><strong>${form.name}</strong></td>
+                    <td>${form.fields.length} fields</td>
+                    <td><span class="badge" style="background: rgba(59,130,246,0.2); color: #60a5fa; padding: 2px 8px; border-radius: 12px;">${form.employee_count}</span></td>
+                    <td>${date}</td>
+                    <td>
+                        <div class="flex gap-2">
+                            <a href="/forms/designer/?id=${form.id}" class="btn btn-secondary" style="padding: 0.25rem 0.6rem; font-size: 0.8rem;" title="Edit Form">
+                                <i class="fa-solid fa-pen"></i>
+                            </a>
+                            <button onclick="deleteForm(${form.id})" class="btn btn-danger" style="padding: 0.25rem 0.5rem; font-size: 0.8rem;" title="Delete Form">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        } catch (error) {
+            console.error('Error fetching forms', error);
+        }
+    }
+
+    async function deleteForm(id) {
+        if (!confirm('Are you sure you want to delete this form? This will also delete ALL employee data associated with it!')) {
+            return;
+        }
+        try {
+            await axios.delete(`/forms/${id}/`);
+            fetchForms();
+        } catch (error) {
+            alert('Failed to delete form.');
+        }
+    }
+</script>
+{% endblock %}

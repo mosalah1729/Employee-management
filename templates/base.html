@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}EmpMgmt{% endblock %} - Employee Management System</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/static/css/style.css">
+    
+    <!-- Axios -->
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+    <script>
+        // Set up Axios defaults
+        axios.defaults.baseURL = '/api';
+        
+        // Add auth token to requests if available
+        axios.interceptors.request.use(config => {
+            const token = localStorage.getItem('access_token');
+            if (token) {
+                config.headers.Authorization = `Bearer ${token}`;
+            }
+            return config;
+        });
+
+        // Handle token expiration/refresh (basic implementation)
+        axios.interceptors.response.use(
+            response => response,
+            async error => {
+                const originalRequest = error.config;
+                if (error.response && error.response.status === 401 && !originalRequest._retry) {
+                    originalRequest._retry = true;
+                    // Note: A full implementation would try to use the refresh token here
+                    // If refresh fails or no refresh token, logout and redirect to login
+                    console.warn("Token expired or invalid");
+                    // Optionally: logoutPath()
+                }
+                return Promise.reject(error);
+            }
+        );
+
+        function handleLogout() {
+            localStorage.removeItem('access_token');
+            localStorage.removeItem('refresh_token');
+            localStorage.removeItem('user');
+            window.location.href = '/login/';
+        }
+        
+        // Check auth on load for protected pages
+        document.addEventListener('DOMContentLoaded', () => {
+            const publicPages = ['/login/', '/register/'];
+            const token = localStorage.getItem('access_token');
+            const currentPath = window.location.pathname;
+            
+            if (!publicPages.includes(currentPath) && !token) {
+                window.location.href = '/login/';
+            } else if (publicPages.includes(currentPath) && token) {
+                window.location.href = '/dashboard/';
+            }
+            
+            // Setup dynamic nav visibility
+            const authNavLinks = document.getElementById('auth-nav-links');
+            if (authNavLinks) {
+                if (token) {
+                    authNavLinks.style.display = 'flex';
+                } else {
+                    authNavLinks.style.display = 'none';
+                }
+            }
+        });
+    </script>
+</head>
+<body>
+
+    {% block navbar %}
+    <nav class="navbar glass">
+        <a href="/dashboard/" class="navbar-brand">
+            <i class="fa-solid fa-layer-group"></i>
+            <span>EmpMgmt</span>
+        </a>
+        <div class="navbar-menu" id="auth-nav-links" style="display: none;">
+            <a href="/dashboard/" class="navbar-item">Dashboard</a>
+            <a href="/forms/" class="navbar-item">Forms</a>
+            <a href="/employees/" class="navbar-item">Employees</a>
+            <a href="/profile/" class="navbar-item">Profile</a>
+            <button onclick="handleLogout()" class="navbar-item" style="background: none; border: none; cursor: pointer; font-size: inherit; font-family: inherit;">Logout</button>
+        </div>
+    </nav>
+    {% endblock %}
+
+    <div class="container main-content">
+        {% block content %}
+        {% endblock %}
+    </div>
+
+    <!-- Scripts block for individual pages -->
+    {% block scripts %}
+    {% endblock %}
+</body>
+</html>

@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block title %}Form Designer{% endblock %}
+
+{% block meta %}
+<!-- edit mode detected via JS from ?id= query param -->
+{% endblock %}
+
+{% block content %}
+<div style="max-width: 800px; margin: 0 auto; width: 100%;">
+<div class="mb-4 flex justify-between items-center gap-4" style="flex-wrap: wrap;">
+    <div id="page-header">
+        <h1>Form Designer</h1>
+        <p class="mt-1 text-secondary">Design your custom employee data form.</p>
+    </div>
+    <a href="/forms/" class="btn btn-secondary" style="white-space: nowrap;">
+        <i class="fa-solid fa-arrow-left"></i> Back to Forms
+    </a>
+</div>
+
+<div class="glass glass-panel pt-3">
+    <div id="error-msg" class="alert alert-error"></div>
+    <div id="success-msg" class="alert alert-success"></div>
+
+    <div class="form-group">
+        <label for="form-name" class="form-label">Form Name</label>
+        <input type="text" id="form-name" class="form-control" placeholder="e.g., Onboarding Form, Technical Profile" required>
+    </div>
+
+    <div class="flex justify-between items-center mt-4 mb-2">
+        <h3>Fields</h3>
+        <button id="add-field-btn" class="btn btn-secondary" style="padding: 0.5rem 1rem;">
+            <i class="fa-solid fa-plus"></i> Add Field
+        </button>
+    </div>
+    
+    <div id="field-list">
+        <!-- Rendered by JS -->
+    </div>
+
+    <div class="mt-4 flex justify-end pt-3 border-t" style="border-top: 1px solid var(--border-color);">
+        <button id="save-form-btn" class="btn btn-primary">
+            <i class="fa-solid fa-save"></i> Save Form Template
+        </button>
+    </div>
+</div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/form_designer.js"></script>
+{% endblock %}
